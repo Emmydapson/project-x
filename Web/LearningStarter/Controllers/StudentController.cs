@@ -7,7 +7,7 @@ using LearningStarter.Data;
 namespace LearningStarter.Controllers;
 
 [ApiController]
-[Route("api/classrooms")]
+[Route("api/student")]
 
 public class StudentController : ControllerBase
 {
