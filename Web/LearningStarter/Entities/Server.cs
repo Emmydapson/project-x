@@ -10,6 +10,7 @@ public class Server
     public string Name { get; set; }
     public string Description { get; set; }
     public string Classroom { get; set; }
+    public List<ServerClassroom> Classes { get; set; }
 }
 
 public class ServerGetDto
