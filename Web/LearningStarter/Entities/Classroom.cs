@@ -40,7 +40,7 @@ public class ClassroomUpdateDto
     public string ClassDescription { get; set;  }
     public string Student { get; set; }
     public string Channel { get; set; }
-    public IEnumerable<ClassroomChannels> Channels { get; set; }
+    public List<ClassroomChannels> Channels { get; set; }
     
     public List<ClassroomStudents> Students { get; set; }
 }
