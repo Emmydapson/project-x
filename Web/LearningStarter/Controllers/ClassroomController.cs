@@ -28,8 +28,8 @@ public class ClassroomController : ControllerBase
             .Select(classroom => new ClassroomGetDto
             {
                 Id = classroom.Id,
-                ClassName = classroom.ClassName,
-                ClassDescription = classroom.ClassDescription,
+                Name = classroom.Name,
+                Description = classroom.Description,
                 Student = classroom.Student,
                 Channel = classroom.Channel
             })
@@ -49,8 +49,8 @@ public class ClassroomController : ControllerBase
             .Select(classroom => new ClassroomGetDto
             {
                 Id = classroom.Id,
-                ClassName = classroom.ClassName,
-                ClassDescription = classroom.ClassDescription,
+                Name = classroom.Name,
+                Description = classroom.Description,
                 Student = classroom.Student,
                 Channel = classroom.Channel
             })
@@ -65,9 +65,9 @@ public class ClassroomController : ControllerBase
     {
         var response = new Response();
         
-        if(string.IsNullOrEmpty(createDto.ClassName))
+        if(string.IsNullOrEmpty(createDto.Name))
         {
-             response.AddError(nameof(createDto.ClassName), "Class Name must not be empty.");   
+             response.AddError(nameof(createDto.Name), "Class Name must not be empty.");   
         }
         
         if(response.HasErrors)
@@ -76,8 +76,8 @@ public class ClassroomController : ControllerBase
         }
         var classroomToCreate = new Classroom
         {
-            ClassName = createDto.ClassName,
-            ClassDescription = createDto.ClassDescription,
+            Name = createDto.Name,
+            Description = createDto.Description,
             Student = createDto.Student,
             Channel = createDto.Channel
         };
@@ -88,8 +88,8 @@ public class ClassroomController : ControllerBase
         var classroomToReturn  = new ClassroomGetDto
         {
             Id = classroomToCreate.Id,
-            ClassName = classroomToCreate.ClassName,
-            ClassDescription = classroomToCreate.ClassDescription,
+            Name = classroomToCreate.Name,
+            Description = classroomToCreate.Description,
             Student = classroomToCreate.Student,
             Channel = classroomToCreate.Channel
         };
@@ -103,9 +103,9 @@ public class ClassroomController : ControllerBase
     {
         var response = new Response();
         
-        if(string.IsNullOrEmpty(updateDto.ClassName))
+        if(string.IsNullOrEmpty(updateDto.Name))
         {
-             response.AddError(nameof(updateDto.ClassName), "Class Name must not be empty.");   
+             response.AddError(nameof(updateDto.Name), "Class Name must not be empty.");   
         }
         
         var classroomToUpdate = _dataContext.Set<Classroom>()
@@ -121,18 +121,19 @@ public class ClassroomController : ControllerBase
             return BadRequest(response);
         }
         
-        classroomToUpdate.ClassName = updateDto.ClassName;
-        classroomToUpdate.ClassDescription = updateDto.ClassDescription;
+        classroomToUpdate.Name = updateDto.Name;
+        classroomToUpdate.Description = updateDto.Description;
         classroomToUpdate.Student = updateDto.Student;
         classroomToUpdate.Channel = updateDto.Channel;
+        classroomToUpdate.Students = updateDto.Students;
         
         _dataContext.SaveChanges();
         
         var classroomToReturn = new ClassroomGetDto
         {
             Id = classroomToUpdate.Id,
-            ClassName = classroomToUpdate.ClassName,
-            ClassDescription = classroomToUpdate.ClassDescription,
+            Name = classroomToUpdate.Name,
+            Description = classroomToUpdate.Description,
             Student = classroomToUpdate.Student,
             Channel = classroomToUpdate.Channel
         };

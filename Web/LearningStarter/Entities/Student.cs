@@ -8,7 +8,6 @@ public class Student
     public int Id { get; set; }
     public string Name { get; set; }
     public string StudentEmail { get; set; }
-    public string Classes { get; set; }
 }
 
 public class StudentGetDto
@@ -16,21 +15,18 @@ public class StudentGetDto
     public int Id { get; set; }
     public string Name { get; set; }
     public string StudentEmail { get; set; }
-    public string Classes { get; set; }
 }
 
 public class StudentCreateDto
 {
     public string Name { get; set; }
     public string StudentEmail { get; set; }
-    public string Classes { get; set; }
 }
 
 public class StudentUpdateDto
 {
     public string Name { get; set; }
     public string StudentEmail { get; set; }
-    public string Classes { get; set; }
 }
 
 public class StudentEntityTypeConfiguration : IEntityTypeConfiguration<Student>

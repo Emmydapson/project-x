@@ -7,7 +7,7 @@ using LearningStarter.Data;
 namespace LearningStarter.Controllers;
 
 [ApiController]
-[Route("api/classrooms")]
+[Route("api/student")]
 
 public class StudentController : ControllerBase
 {
@@ -30,7 +30,6 @@ public class StudentController : ControllerBase
                 Id = student.Id,
                 Name = student.Name,
                 StudentEmail = student.StudentEmail,
-                Classes = student.Classes
             })
             .ToList();
         
@@ -50,7 +49,6 @@ public class StudentController : ControllerBase
                 Id = student.Id,
                 Name = student.Name,
                 StudentEmail = student.StudentEmail,
-                Classes = student.Classes
             })
             .FirstOrDefault(student => student.Id == id);
         
@@ -76,7 +74,6 @@ public class StudentController : ControllerBase
         {
             Name = createDto.Name,
             StudentEmail = createDto.StudentEmail,
-            Classes = createDto.Classes
         };
         
         _dataContext.Set<Student>().Add(studentToCreate);
@@ -87,7 +84,6 @@ public class StudentController : ControllerBase
             Id = studentToCreate.Id,
             Name = studentToCreate.Name,
             StudentEmail = studentToCreate.StudentEmail,
-            Classes = studentToCreate.Classes
         };
         
         response.Data = studentToReturn;
@@ -119,7 +115,6 @@ public class StudentController : ControllerBase
         
         studentToUpdate.Name = updateDto.Name;
         studentToUpdate.StudentEmail = updateDto.StudentEmail;
-        studentToUpdate.Classes = updateDto.Classes;
         
         _dataContext.SaveChanges();
         
@@ -128,7 +123,6 @@ public class StudentController : ControllerBase
             Id = studentToUpdate.Id,
             Name = studentToUpdate.Name,
             StudentEmail = studentToUpdate.StudentEmail,
-            Classes = studentToUpdate.Classes
         };
         
         response.Data = studentToReturn;
