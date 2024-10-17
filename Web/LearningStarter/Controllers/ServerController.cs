@@ -7,7 +7,7 @@ using LearningStarter.Data;
 namespace LearningStarter.Controllers;
 
 [ApiController]
-[Route("api/classrooms")]
+[Route("api/server")]
 
 public class ServerController : ControllerBase
 {
@@ -120,6 +120,7 @@ public class ServerController : ControllerBase
         serverToUpdate.Name = updateDto.Name;
         serverToUpdate.Description = updateDto.Description;
         serverToUpdate.Classroom = updateDto.Classroom;
+        serverToUpdate.Classes = updateDto.Classes;
         
         _dataContext.SaveChanges();
         
