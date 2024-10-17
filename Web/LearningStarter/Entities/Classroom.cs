@@ -12,6 +12,8 @@ public class Classroom
     public string Student { get; set; }
     public string Channel { get; set; }
     
+    public IEnumerable<ClassroomChannels> Channels { get; set; }
+    
     public List<ClassroomStudents> Students { get; set; }
 }
 
@@ -38,6 +40,9 @@ public class ClassroomUpdateDto
     public string ClassDescription { get; set;  }
     public string Student { get; set; }
     public string Channel { get; set; }
+    public IEnumerable<ClassroomChannels> Channels { get; set; }
+    
+    public List<ClassroomStudents> Students { get; set; }
 }
 
 public class ClassroomEntityTypeConfiguration : IEntityTypeConfiguration<Classroom>
