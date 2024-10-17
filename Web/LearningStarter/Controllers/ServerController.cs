@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using LearningStarter.Common;
 using LearningStarter.Entities;
 using Microsoft.AspNetCore.Mvc;
