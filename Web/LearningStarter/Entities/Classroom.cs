@@ -12,6 +12,8 @@ public class Classroom
     public string Student { get; set; }
     public string Channel { get; set; }
     
+    public List<ClassroomChannels> Channels { get; set; }
+    
     public List<ClassroomStudents> Students { get; set; }
 }
 
@@ -38,6 +40,7 @@ public class ClassroomUpdateDto
     public string Description { get; set;  }
     public string Student { get; set; }
     public string Channel { get; set; }
+    public List<ClassroomChannels> Channels { get; set; }
     public List<ClassroomStudents> Students { get; set; }
 }
 

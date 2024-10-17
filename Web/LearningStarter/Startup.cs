@@ -90,10 +90,7 @@ public class Startup
             c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
         });
 
-        services.AddSpaStaticFiles(config =>
-        {
-            config.RootPath = "learning-starter-web/build";
-        });
+        services.AddSpaStaticFiles(config => { config.RootPath = "learning-starter-web/build"; });
 
         services.AddHttpContextAccessor();
 
@@ -107,7 +104,7 @@ public class Startup
     {
         dataContext.Database.EnsureDeleted();
         dataContext.Database.EnsureCreated();
-        
+
         app.UseHsts();
         app.UseHttpsRedirection();
         app.UseStaticFiles();
@@ -123,17 +120,11 @@ public class Startup
             .AllowAnyHeader());
 
         // Enable middleware to serve generated Swagger as a JSON endpoint.
-        app.UseSwagger(options =>
-        {
-            options.SerializeAsV2 = true;
-        });
+        app.UseSwagger(options => { options.SerializeAsV2 = true; });
 
         // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
         // specifying the Swagger JSON endpoint.
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Learning Starter Server API V1");
-        });
+        app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Learning Starter Server API V1"); });
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -148,16 +139,49 @@ public class Startup
                 spa.UseProxyToSpaDevelopmentServer("http://localhost:3001");
             }
         });
-        
+
         using var scope = app.ApplicationServices.CreateScope();
         var userManager = scope.ServiceProvider.GetService<UserManager<User>>();
         var roleManager = scope.ServiceProvider.GetService<RoleManager<Role>>();
 
         SeedRoles(dataContext, roleManager).Wait();
         SeedUsers(dataContext, userManager).Wait();
+        SeedServerTypes(dataContext);
+        
+
+        // #BEGINNING CODE
+
+//added underneath comment}
     }
 
-    private static async Task SeedUsers(DataContext dataContext, UserManager<User> userManager)
+    private static void SeedServerTypes(DataContext dataContext)
+    {
+        if (dataContext.Set<ServerTypes>().Any())
+        {
+            return;
+        }
+
+        var seededServerType1 = new ServerTypes
+        {
+            Name = "School",
+            Description = "Southeastern Louisiana University",
+
+        };
+        dataContext.Set<ServerTypes>().Add(seededServerType1);
+        dataContext.SaveChanges();
+
+        var seededServerType2 = new ServerTypes
+        {
+            Name = "Class",
+            Description = ""
+        };
+        dataContext.Set<ServerTypes>().Add(seededServerType2);
+        dataContext.SaveChanges();
+    }
+
+//}
+
+private static async Task SeedUsers(DataContext dataContext, UserManager<User> userManager)
     {
         var numUsers = dataContext.Users.Count();
 
