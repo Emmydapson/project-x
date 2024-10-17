@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LearningStarter.Controllers;
 
 [ApiController]
-[Route("api/ServerTypes")]
+[Route("api/server-types")]
 
 public class ServerTypesController : ControllerBase
 {
