@@ -21,3 +21,19 @@ export type UserDto = {
   lastName: string;
   userName: string;
 };
+
+export type   ServersGetDto = {
+  id: number;
+  name: string;
+  description: string;
+  memberCount: number;
+  createdAt: string;
+};
+
+export type   landingpageGetDto = {
+  
+};
+
+export type ServersCreateUpdateDto= {
+
+};

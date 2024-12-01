@@ -164,7 +164,7 @@ public class Startup
         var seededServerType1 = new ServerTypes
         {
             Name = "School",
-            Description = "Southeastern Louisiana University",
+            Description = "",
 
         };
         dataContext.Set<ServerTypes>().Add(seededServerType1);

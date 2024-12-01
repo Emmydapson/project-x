@@ -67,6 +67,13 @@ const navigation: NavigationItem[] = [
       to: routes.user,
     },
   },
+  {
+    text: "Servers",
+    hide: false,
+    nav: {
+      to: routes.ServersListing,
+    }
+  }
 ];
 
 const DesktopNavigation = () => {

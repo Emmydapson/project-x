@@ -3,4 +3,9 @@ export const routes = {
   root: `/`,
   home: `/home`,
   user: `/user`,
+  ServersListing: '/Servers',
+  ServersUpdate: '/Servers/:id',
+  LandingPageUpdate: '/landingpage/:id',
+  AddServer: "/Add-server",
+  ServerDetail: "Server-detail",
 };
