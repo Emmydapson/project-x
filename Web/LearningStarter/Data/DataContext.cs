@@ -12,6 +12,9 @@ public sealed class DataContext : IdentityDbContext<User, Role, int>
     {
     }
 
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<Server> Servers { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
