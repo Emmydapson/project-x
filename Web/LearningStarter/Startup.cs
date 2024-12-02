@@ -17,38 +17,37 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace LearningStarter
+namespace LearningStarter;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
+        Configuration = configuration;
+    }
+
+    private IConfiguration Configuration { get; }
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCors();
+        services.AddControllers();
+
+        services.AddHsts(options =>
         {
-            Configuration = configuration;
-        }
+            options.MaxAge = TimeSpan.MaxValue;
+            options.Preload = true;
+            options.IncludeSubDomains = true;
+        });
 
-        private IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        services.AddDbContext<DataContext>(options =>
         {
-            services.AddCors();
-            services.AddControllers();
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+        });
 
-            services.AddHsts(options =>
-            {
-                options.MaxAge = TimeSpan.MaxValue;
-                options.Preload = true;
-                options.IncludeSubDomains = true;
-            });
-
-            // Configure the database context to use SQL Server
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            });
-
-            // Set up Identity
-            services.AddIdentity<User, Role>(options =>
+        services.AddIdentity<User, Role>(
+                options =>
                 {
                     options.SignIn.RequireConfirmedAccount = false;
                     options.Password.RequireNonAlphanumeric = false;
@@ -60,133 +59,134 @@ namespace LearningStarter
                     options.ClaimsIdentity.UserNameClaimType = JwtClaimTypes.Name;
                     options.ClaimsIdentity.RoleClaimType = JwtClaimTypes.Role;
                 })
-                .AddEntityFrameworkStores<DataContext>();
+            .AddEntityFrameworkStores<DataContext>();
 
-            services.AddMvc();
+        services.AddMvc();
 
-            // Cookie Authentication setup
-            services
-                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.Events.OnRedirectToLogin = context =>
-                    {
-                        context.Response.StatusCode = 401;
-                        return Task.CompletedTask;
-                    };
-                });
-
-            services.AddAuthorization();
-
-            // Swagger setup for API documentation
-            services.AddSwaggerGen(c =>
+        services
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                options.Events.OnRedirectToLogin = context =>
                 {
-                    Title = "Learning Starter Server",
-                    Version = "v1",
-                    Description = "Description for the API goes here.",
-                });
-
-                c.CustomOperationIds(apiDesc => apiDesc.TryGetMethodInfo(out var methodInfo) ? methodInfo.Name : null);
-                c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
             });
 
-            // Setup for SPA static files (if applicable)
-            services.AddSpaStaticFiles(config => { config.RootPath = "learning-starter-web/build"; });
+        services.AddAuthorization();
 
-            services.AddHttpContextAccessor();
-
-            // Dependency Injection setup for application services
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
-
-            // Add logging to capture startup issues
-            services.AddLogging(builder =>
-            {
-                builder.AddConsole();
-                builder.AddDebug();
-            });
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext dataContext)
+        // Swagger
+        services.AddSwaggerGen(c =>
         {
-            // Apply migrations to ensure database is up to date (instead of EnsureCreated)
-            dataContext.Database.Migrate();
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Learning Starter Server",
+                Version = "v1",
+                Description = "Description for the API goes here.",
+            });
 
+            c.CustomOperationIds(apiDesc => apiDesc.TryGetMethodInfo(out var methodInfo) ? methodInfo.Name : null);
+            c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
+        });
+
+        services.AddSpaStaticFiles(config => { config.RootPath = "learning-starter-web/build"; });
+
+        services.AddHttpContextAccessor();
+
+        // configure DI for application services
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext dataContext)
+    {
+        dataContext.Database.EnsureDeleted();
+        dataContext.Database.EnsureCreated();
+
+        app.UseHsts();
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+        app.UseSpaStaticFiles();
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        // global cors policy
+        app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
+        // Enable middleware to serve generated Swagger as a JSON endpoint.
+        app.UseSwagger(options => { options.SerializeAsV2 = true; });
+
+        // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+        // specifying the Swagger JSON endpoint.
+        app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Learning Starter Server API V1"); });
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(x => x.MapControllers());
+
+        app.UseSpa(spa =>
+        {
+            spa.Options.SourcePath = "learning-starter-web";
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage(); // Show detailed error pages in development
+                spa.UseProxyToSpaDevelopmentServer("http://localhost:3001");
             }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error"); // Handle errors in production
-            }
+        });
 
-            app.UseHsts();
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSpaStaticFiles(); // Serve SPA static files
+        using var scope = app.ApplicationServices.CreateScope();
+        var userManager = scope.ServiceProvider.GetService<UserManager<User>>();
+        var roleManager = scope.ServiceProvider.GetService<RoleManager<Role>>();
 
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
+        SeedRoles(dataContext, roleManager).Wait();
+        SeedUsers(dataContext, userManager).Wait();
+        SeedServerTypes(dataContext);
+        
 
-            // Global CORS policy
-            app.UseCors(x => x
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+        // #BEGINNING CODE
 
-            // Enable Swagger for API documentation
-            app.UseSwagger(options => { options.SerializeAsV2 = true; });
+//added underneath comment}
+    }
 
-            // Enable Swagger UI for browsing API
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Learning Starter Server API V1"); });
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-
-            // Serve SPA if in development mode
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "learning-starter-web"; // Adjust to your SPA source path
-
-                if (env.IsDevelopment())
-                {
-                    // Proxy requests to your SPA development server
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3001");
-                }
-            });
-
-            // Seed the database with roles, users, and server types
-            using var scope = app.ApplicationServices.CreateScope();
-            var userManager = scope.ServiceProvider.GetService<UserManager<User>>();
-            var roleManager = scope.ServiceProvider.GetService<RoleManager<Role>>();
-
-            SeedRoles(dataContext, roleManager).Wait();
-            SeedUsers(dataContext, userManager).Wait();
-            SeedServerTypes(dataContext);
+    private static void SeedServerTypes(DataContext dataContext)
+    {
+        if (dataContext.Set<ServerTypes>().Any())
+        {
+            return;
         }
 
-        // Seed roles in the database
-        private static async Task SeedRoles(DataContext dataContext, RoleManager<Role> roleManager)
+        var seededServerType1 = new ServerTypes
         {
-            if (dataContext.Roles.Any()) return;
+            Name = "School",
+            Description = "",
 
-            var seededRole = new Role { Name = "Admin" };
-            await roleManager.CreateAsync(seededRole);
-            await dataContext.SaveChangesAsync();
-        }
+        };
+        dataContext.Set<ServerTypes>().Add(seededServerType1);
+        dataContext.SaveChanges();
 
-        // Seed users in the database
-        private static async Task SeedUsers(DataContext dataContext, UserManager<User> userManager)
+        var seededServerType2 = new ServerTypes
         {
-            if (dataContext.Users.Any()) return;
+            Name = "Class",
+            Description = ""
+        };
+        dataContext.Set<ServerTypes>().Add(seededServerType2);
+        dataContext.SaveChanges();
+    }
 
+//}
+
+private static async Task SeedUsers(DataContext dataContext, UserManager<User> userManager)
+    {
+        var numUsers = dataContext.Users.Count();
+
+        if (numUsers == 0)
+        {
             var seededUser = new User
             {
                 FirstName = "Seeded",
@@ -198,20 +198,21 @@ namespace LearningStarter
             await userManager.AddToRoleAsync(seededUser, "Admin");
             await dataContext.SaveChangesAsync();
         }
+    }
+    
+    private static async Task SeedRoles(DataContext dataContext, RoleManager<Role> roleManager)
+    {
+        var numRoles = dataContext.Roles.Count();
 
-        // Seed server types in the database
-        private static void SeedServerTypes(DataContext dataContext)
+        if (numRoles == 0)
         {
-            if (dataContext.Set<ServerTypes>().Any()) return;
-
-            var serverTypes = new[]
+            var seededRole = new Role
             {
-                new ServerTypes { Name = "School", Description = "" },
-                new ServerTypes { Name = "Class", Description = "" }
+                Name = "Admin"
             };
 
-            dataContext.Set<ServerTypes>().AddRange(serverTypes);
-            dataContext.SaveChanges();
+            await roleManager.CreateAsync(seededRole);
+            await dataContext.SaveChangesAsync();
         }
     }
 }
