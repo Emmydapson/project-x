@@ -15,6 +15,7 @@ public static class Program
         return Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(builder => builder
                 .CaptureStartupErrors(true)
-                .UseStartup<Startup>());
+                .UseStartup<Startup>()
+                .UseUrls("http://0.0.0.0:5000", "https://0.0.0.0:5001"));
     }
 }
